@@ -1,0 +1,3 @@
+# kec_app
+This is the app upto signup, pretty sure signup doesn't work...
+Well I made the iconbutton in appbar work, that makes a login page
