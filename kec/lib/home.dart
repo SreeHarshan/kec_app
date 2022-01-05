@@ -14,7 +14,7 @@ class _Home extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Kongu Engineering College"),
+          title: const Text("KEC"),
           leading: const IconButton(
             icon: Icon(Icons.menu),
             tooltip: 'Navigation menu',

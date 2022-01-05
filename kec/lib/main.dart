@@ -29,14 +29,19 @@ void main() => runApp(MaterialApp(
     home: Main()));
 */
 class Main extends StatefulWidget {
+  const Main({Key? key}) : super(key: key);
+
+  @override
   _main createState() => _main();
 }
 
+// ignore: camel_case_types
 class _main extends State<Main> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Kongu Engineering College"),
+          title: const Text("KEC"),
           leading: const IconButton(
             icon: Icon(Icons.menu),
             tooltip: 'Navigation menu',
@@ -45,10 +50,8 @@ class _main extends State<Main> {
           actions: <Widget>[
             IconButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginPage()));
                 },
                 icon: const Icon(Icons.assignment_ind))
           ],

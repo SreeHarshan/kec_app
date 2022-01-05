@@ -1,43 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:validate/validate.dart';
 
 import 'colors.dart' as colors;
 import 'signup.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  LoginPage({Key? key}) : super(key: key);
 
+  @override
   _loginpage createState() => _loginpage();
 }
 
 // ignore: camel_case_types
 class _loginpage extends State<LoginPage> {
-  late TextEditingController _rollno, _pass;
-  @override
-  void initState() {
-    super.initState();
-    _rollno = TextEditingController();
-    _pass = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String email = "", pass = "";
+  String? _validateEmail(String? value) {
+    // If empty value, the isEmail function throw a error.
+    // So I changed this function with try and catch.
+    try {
+      Validate.isEmail(value);
+    } catch (e) {
+      return 'The E-mail Address must be a valid email address.';
+    }
+
+    return null;
   }
 
-  void _login() {
-    if (_rollno.text.isNotEmpty && _pass.text.isNotEmpty) {
-      //TODO login here
-      Navigator.pop(context);
-    } else {
-      /*
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: const Text("Incorrect Values"),
-                actions: [
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Retry"))
-                ],
-              ));*/
+  String? _validatePassword(String? value) {
+    if (value!.length < 8) {
+      return 'The Password must be at least 8 characters.';
+    }
+    return null;
+  }
 
+  void _submit() {
+    // First validate form.
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save(); // Save our form now.
+
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please enter details correctly'),
         backgroundColor: Colors.red,
@@ -47,93 +49,114 @@ class _loginpage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Kongu Engineering College"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          tooltip: 'Back',
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        appBar: AppBar(
+          title: const Text("KEC"),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            tooltip: 'Back',
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-      ),
-      body: Center(
+        body: Center(
           child: Container(
-              margin: const EdgeInsets.all(15.0),
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.green)),
-              child: Column(
+            margin: const EdgeInsets.all(15.0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
                 children: <Widget>[
                   const Text(
-                    "Login/Sign Up",
+                    "Login",
                     style: TextStyle(
                       color: colors.foreground,
                       fontSize: 25,
                     ),
                   ),
-                  const SizedBox(height: 10), // to add padding
+                  const SizedBox(height: 10),
+                  TextFormField(
+                      keyboardType: TextInputType
+                          .emailAddress, // Use email input type for emails.
 
-                  TextField(
-                    controller: _rollno,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Roll No',
-                    ),
-                    enableSuggestions: false,
-                    autocorrect: false,
-                  ),
-                  const SizedBox(height: 1), // to add padding
-
-                  TextField(
-                    controller: _pass,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Password',
-                    ),
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                  ),
-                  const SizedBox(height: 10), // to add padding
-
-                  GestureDetector(
-                    onTap: _login,
-                    child: Container(
-                      height: 50.0,
-                      width: 100.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: colors.background,
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Log In',
-                          style: TextStyle(color: colors.foreground),
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'you@example.com',
+                          labelText: 'E-mail Address'),
+                      validator: _validateEmail,
+                      onSaved: (String? value) {
+                        email = value!;
+                      }),
+                  const SizedBox(height: 5),
+                  TextFormField(
+                      obscureText: true, // Use secure text for passwords.
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Password',
+                          labelText: 'Enter your password'),
+                      validator: _validatePassword,
+                      onSaved: (String? value) {
+                        pass = value!;
+                      }),
+                  Container(
+                    width: screenSize.width,
+                    child: Column(children: <Widget>[
+                      GestureDetector(
+                        onTap: _submit,
+                        child: Container(
+                          height: 50.0,
+                          width: 100.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: colors.background,
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Log In',
+                              style: TextStyle(color: colors.foreground),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SignupPage()));
-                      },
-                      child: const Text("New User? Register",
-                          style: TextStyle(color: Colors.grey)))
+                      const SizedBox(height: 10), // to add padding
+
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignupPage()));
+                        },
+                        child: Container(
+                          height: 50.0,
+                          width: 100.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: colors.background,
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Register',
+                              style: TextStyle(color: colors.foreground),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                    margin: const EdgeInsets.only(top: 20.0),
+                  )
                 ],
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-              ))),
-    );
+              ),
+            ),
+          ),
+        ));
   }
 
   @override
   void dispose() {
-    _rollno.dispose();
-    _pass.dispose();
+//    _rollno.dispose();
+//    _pass.dispose();
     super.dispose();
   }
 }
