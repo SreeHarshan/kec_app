@@ -1,15 +1,19 @@
-// ignore_for_file: non_constant_identifier_names
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:validate/validate.dart';
 import 'package:flutter/material.dart';
 
 import 'colors.dart' as colors;
+import 'global_vars.dart' as global;
+import 'dart:convert' as convert;
+import 'package:http/http.dart' as HTTP;
 
 bool isDigit(String s) {
   return int.tryParse(s) != null;
 }
 
 class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+  final Function() notifyParent;
+  const SignupPage({Key? key, required this.notifyParent}) : super(key: key);
 
   @override
   _signup createState() => _signup();
@@ -17,10 +21,10 @@ class SignupPage extends StatefulWidget {
 
 // ignore: camel_case_types
 class _signup extends State<SignupPage> {
+  // ignore: non_constant_identifier_names
   String email = "", pass = "", confim_pass = "", name = "", rollno = "";
   bool _done = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   String? _validateEmail(String? value) {
     // If empty value, the isEmail function throw a error.
     // So I changed this function with try and catch.
@@ -45,8 +49,6 @@ class _signup extends State<SignupPage> {
 
   String? _validateConfirmPass(String? value) {
     if (value! != pass) {
-      print("password:" + value);
-      print("confirm pass:" + pass);
       _done = false;
       return "The password does not match";
     }
@@ -54,7 +56,7 @@ class _signup extends State<SignupPage> {
 
   String? _validaterollno(String? value) {
     if (value!.length != 8) {
-      return 'Enter rollno properly';
+      return 'The rollno should be valid';
     }
     String s1, s2, s3;
     s1 = value.substring(0, 2);
@@ -68,6 +70,17 @@ class _signup extends State<SignupPage> {
     }
   }
 
+  buildShowDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        });
+  }
+
   void _senderror() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Please enter details correctly'),
@@ -75,15 +88,48 @@ class _signup extends State<SignupPage> {
     ));
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     // First validate form.
     _done = true;
     if (_formKey.currentState!.validate() && _done) {
       _formKey.currentState!.save();
-      Navigator.pop(context);
-      Navigator.pop(context);
 
-      //Login here
+      try {
+        var url = Uri.parse("http://127.0.0.1:8000/api/signup/");
+        buildShowDialog(context);
+        var response = await HTTP.post(url, body: {
+          'rollno': rollno,
+          'email': email,
+          'password': pass,
+          'name': name
+        });
+        var jsonResponse =
+            convert.jsonDecode(response.body) as Map<String, dynamic>;
+        global.login = jsonResponse['login'];
+        if (global.login) {
+          global.rollno = rollno;
+          global.name = name;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Registered successfully'),
+            backgroundColor: Colors.green,
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('There was an error registering'),
+            backgroundColor: Colors.red,
+          ));
+        }
+        Navigator.pop(context);
+      } on Exception catch (_) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('There was an issue registering in'),
+          backgroundColor: Colors.red,
+        ));
+      }
+
+      widget.notifyParent();
+      Navigator.pop(context);
+      Navigator.pop(context);
     } else {
       _senderror();
     }
@@ -126,6 +172,15 @@ class _signup extends State<SignupPage> {
                     validator: _validaterollno,
                     onSaved: (String? value) {
                       rollno = value!;
+                    }),
+                const SizedBox(height: 10),
+                TextFormField(
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Name',
+                        labelText: 'Name'),
+                    onSaved: (String? value) {
+                      name = value!;
                     }),
                 const SizedBox(height: 5),
                 TextFormField(

@@ -13,14 +13,6 @@ class _Home extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("KEC"),
-          leading: const IconButton(
-            icon: Icon(Icons.menu),
-            tooltip: 'Navigation menu',
-            onPressed: null,
-          ),
-        ),
         body: Center(
             child: Container(
                 margin: const EdgeInsets.all(15.0),
