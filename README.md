@@ -1,3 +1,6 @@
-An app that I made for the competition in my college
+An app that I made for a competition in my college
 
-works upto login and signup frontend
+Features:
+* Users can host events 
+* Other students can join the events
+* Encrypted password
